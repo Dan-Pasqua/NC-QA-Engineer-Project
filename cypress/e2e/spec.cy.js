@@ -5,7 +5,7 @@ const errors = require('../fixtures/error-messages.json');
 const months = require('../fixtures/months.json');
 const informationForm = require('../fixtures/information-form.json');
 
-describe.only('Restful Booker Platform Demo', () => {
+describe('Restful Booker Platform Demo', () => {
   beforeEach(() => {
     // Visit site and check for logo to verify existence and visibility of homepage
     cy.visit('/');
@@ -14,6 +14,7 @@ describe.only('Restful Booker Platform Demo', () => {
 
   it('displays room options on the homepage', () => {
     /* User Story #1 */
+    /* ---------- APPROACH #1 ---------- */
     // Check for Rooms header
     cy.get('.room-header')
       .scrollIntoView()
@@ -56,6 +57,66 @@ describe.only('Restful Booker Platform Demo', () => {
             .and('have.text', amenities[i]);
         }
       });
+
+    /*
+          In the above approach, I verified the first available room since only one room appeared on the 
+          site around 90 percent of the time I had it open. Since the availability included multiple rooms 
+          only on a few occasions, I added the approach below to demonstrate the ability to iterate 
+          through each room and print its information as if I were using a fixture file. Using a fixture 
+          file to verify availability based on the calendar bookings would require a cleanup script to reset 
+          the room availability after the test is finished running.
+
+          If I had access to the database, I'd write SQL queries to return available rooms and their 
+          information and compare it to what is visible in the UI.
+    */
+
+    /* ---------- APPROACH #2 ---------- */
+    cy.get('.hotel-room-info').then(($availableRooms) => {
+      const roomCount = $availableRooms.length;
+      let wheelchairAccessible = cy.get('.wheelchair');
+
+      for (let i = 0; i < roomCount; i++) {
+        cy.get(`:nth-child(${i + 1}) .hotel-room-info`).within(() => {
+          cy.get('h3').then(($room) => {
+            // Print room type
+            let roomType = $room.text();
+            cy.log(roomType);
+
+            // Print handicap accessible
+            !wheelchairAccessible
+              ? cy.log('Not an accessible room')
+              : cy.log('Room is accessible');
+
+            // Print room information
+            cy.get('p')
+              .should('exist')
+              .and('be.visible')
+              .then(($description) => {
+                let roomInformation = $description.text();
+                cy.log(roomInformation);
+              });
+
+            // Print amenities
+            cy.get('ul')
+              .should('exist')
+              .and('be.visible')
+              .then(($list) => {
+                let listLength = $list.children().length;
+
+                for (let x = 0; x < listLength; x++) {
+                  cy.get(`ul > :nth-child(${x + 1})`)
+                    .should('exist')
+                    .and('be.visible')
+                    .then(($amenity) => {
+                      let listItem = $amenity.text();
+                      cy.log(listItem);
+                    });
+                }
+              });
+          });
+        });
+      }
+    });
   });
 
   it('loads the availability calendar and contact information form after clicking on the Book this room button', () => {
@@ -107,7 +168,7 @@ describe.only('Restful Booker Platform Demo', () => {
       });
   });
 
-  it.only('checks the information form functionality', () => {
+  it('checks the information form functionality', () => {
     /* User Story #5 */
     openCalendar();
 
