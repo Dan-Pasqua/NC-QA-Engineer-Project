@@ -1,6 +1,6 @@
 /// <reference types='Cypress' />
 import '../utils/helpers';
-import { openCalendar } from '../utils/helpers';
+import { completeInformationForm, openCalendar } from '../utils/helpers';
 const errors = require('../fixtures/error-messages.json');
 const months = require('../fixtures/months.json');
 const informationForm = require('../fixtures/information-form.json');
@@ -127,6 +127,10 @@ describe('Restful Booker Platform Demo', () => {
       .should('exist')
       .and('be.visible')
       .then(() => {
+        cy.get('button').contains('Today').should('exist').and('be.visible');
+        cy.get('button').contains('Back').should('exist').and('be.visible');
+        cy.get('button').contains('Next').should('exist').and('be.visible');
+
         var date = new Date();
         let bookingDate =
           months[date.getMonth() + 1] + ' ' + date.getFullYear();
@@ -202,5 +206,64 @@ describe('Restful Booker Platform Demo', () => {
         // }
         // });
       });
+  });
+
+  it.skip('produces a "Booking successful" pop-up after a successful booking', () => {
+    openCalendar();
+
+    // Select dates
+    let num = Math.floor(Math.random() * 7 + 3);
+    for (let i = 0; i < num; i++) {
+      cy.get('button')
+        .contains('Next')
+        .should('exist')
+        .and('be.visible')
+        .scrollIntoView()
+        .click();
+    }
+
+    let firstDay;
+    let lastDay;
+
+    cy.get('.rbc-date-cell:not(".rbc-off-range")')
+      .eq(1)
+      .drag('.rbc-date-cell:not(".rbc-off-range"):nth(15)');
+
+    // Complete information form
+    completeInformationForm();
+
+    // // Book trip
+    // cy.get('button')
+    //   .contains('Book')
+    //   .should('exist')
+    //   .and('be.visible')
+    //   .click()
+    //   .then(() => {
+    //     cy.get('.confirmation-modal')
+    //       .should('exist')
+    //       .and('be.visible')
+    //       .within(() => {
+    //         // Check contents
+    //         cy.get('h3')
+    //           .should('exist')
+    //           .and('be.visible')
+    //           .and('have.text', 'Booking Successful!');
+
+    //         // Check dates
+    //         cy.get('p')
+    //           .should('exist')
+    //           .and('be.visible')
+    //           .and(
+    //             'have.text',
+    //             'Congratulations! Your booking has been confirmed for:'
+    //           );
+
+    //         cy.get('.btn-outline-primary')
+    //           .should('exist')
+    //           .and('be.visible')
+    //           .and('have.text', 'Close')
+    //           .click();
+    //       });
+    //   });
   });
 });
