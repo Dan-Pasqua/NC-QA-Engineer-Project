@@ -1,7 +1,9 @@
 /// <reference types='Cypress' />
 import '../utils/helpers';
 import { openCalendar } from '../utils/helpers';
+const errors = require('../fixtures/error-messages.json');
 const months = require('../fixtures/months.json');
+const informationForm = require('../fixtures/information-form.json');
 
 describe.only('Restful Booker Platform Demo', () => {
   beforeEach(() => {
@@ -57,7 +59,7 @@ describe.only('Restful Booker Platform Demo', () => {
   });
 
   it('loads the availability calendar and contact information form after clicking on the Book this room button', () => {
-    /* User Story #2 */
+    /* User Story #3 */
     // Opens the calendar in edit mode
     openCalendar();
     cy.get('.rbc-calendar')
@@ -102,6 +104,42 @@ describe.only('Restful Booker Platform Demo', () => {
                 .and('have.attr', 'placeholder', fieldNames[i]);
             }
           });
+      });
+  });
+
+  it.only('checks the information form functionality', () => {
+    /* User Story #5 */
+    openCalendar();
+
+    // Check each input
+    informationForm.forEach((input) => {
+      cy.get(input.input)
+        .should('exist')
+        .and('be.visible')
+        .then(($field) => {
+          cy.get($field).should('have.attr', 'placeholder', input.placeholder);
+        });
+    });
+    // Check if inputs are mandatory
+    cy.get('button')
+      .contains('Book')
+      .should('exist')
+      .and('be.visible')
+      .click()
+      .then(() => {
+        // Check error messages
+        /* ---------- BUG FOUND: Error messages are not in the same order from run to run ---------- */
+        /* ---------- BUG FOUND: Error messages do not specify inputs, except for Firstname and Lastname ---------- */
+        /* Fixture and related code saved to demonstrate preparations for future bug fix */
+        cy.get('.alert-danger').should('exist').and('be.visible');
+        // .within(() => {
+        // for (let i = 0; i < errors.length; i++) {
+        //   cy.get(`p:nth-child(${i + 1})`)
+        //     .should('exist')
+        //     .and('be.visible')
+        //     .and('contain', errors[i]);
+        // }
+        // });
       });
   });
 });

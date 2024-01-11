@@ -1,0 +1,22 @@
+[
+  {
+    "input": ".room-firstname",
+    "placeholder": "Firstname",
+    "text": "Dan"
+  },
+  {
+    "input": ".room-lastname",
+    "placeholder": "Lastname",
+    "text": "Pasqua"
+  },
+  {
+    "input": ".room-email",
+    "placeholder": "Email",
+    "text": "fake@fake.com"
+  },
+  {
+    "input": ".room-phone",
+    "placeholder": "Phone",
+    "text": "412-555-5555)"
+  }
+]

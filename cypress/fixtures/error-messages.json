@@ -1,0 +1,11 @@
+[
+  "size must be between 3 and 18",
+  "size must be between 3 and 30",
+  "must not be null",
+  "must not be null",
+  "must not be empty",
+  "Firstname should not be blank",
+  "Lastname should not be blank",
+  "must not be empty",
+  "size must be between 11 and 21"
+]
