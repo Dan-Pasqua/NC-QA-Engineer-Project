@@ -1,12 +1,17 @@
 /// <reference types='Cypress' />
-describe('Restful Booker Platform Demo', () => {
+import '../utils/helpers';
+import { openCalendar } from '../utils/helpers';
+const months = require('../fixtures/months.json');
+
+describe.only('Restful Booker Platform Demo', () => {
   beforeEach(() => {
-    // Visit site and check for logo
+    // Visit site and check for logo to verify existence and visibility of homepage
     cy.visit('/');
     cy.get('.hotel-logoUrl').should('exist').and('be.visible');
   });
 
-  it('should display room options on the homepage', () => {
+  it('displays room options on the homepage', () => {
+    /* User Story #1 */
     // Check for Rooms header
     cy.get('.room-header')
       .scrollIntoView()
@@ -20,42 +25,83 @@ describe('Restful Booker Platform Demo', () => {
       .should('exist')
       .and('be.visible');
 
-    // Get number of available rooms
-    const availableRooms = cy.get('.hotel-room-info h3').length;
-    cy.log(availableRooms);
+    // Check room information
+    cy.get('.hotel-room-info')
+      .first()
+      .should('exist')
+      .and('be.visible')
+      .within(() => {
+        cy.get('h3')
+          .should('exist')
+          .and('be.visible')
+          .and('have.text', 'single');
 
-    // // Log each header
-    // availableRooms.forEach(($room) => {
-    //   let roomHeader = $room.textContent;
-    //   cy.log(roomHeader);
+        cy.get('p')
+          .should('exist')
+          .and('be.visible')
+          .and(
+            'have.text',
+            'Aenean porttitor mauris sit amet lacinia molestie. In posuere accumsan aliquet. Maecenas sit amet nisl massa. Interdum et malesuada fames ac ante.'
+          );
 
-    //   cy.get($room).within(() => {
-    //     cy.get('li').children();
-    //   });
-    //});
-  });
-});
+        // Check room amenities
+        const amenities = ['TV', 'WiFi', 'Safe'];
 
-describe.only('Booking', () => {
-  beforeEach(() => {
-    // Visit site and check for logo
-    cy.visit('/');
-    cy.get('.hotel-logoUrl').should('exist').and('be.visible');
-    cy.get('.room-header').scrollIntoView();
+        for (let i = 0; i < amenities.length; i++) {
+          cy.get(`ul > :nth-child(${i + 1})`)
+            .should('exist')
+            .and('be.visible')
+            .and('have.text', amenities[i]);
+        }
+      });
   });
 
   it('loads the availability calendar and contact information form after clicking on the Book this room button', () => {
-    // Click on the Book this room button to open the calendar in edit mode
-    cy.get('.openBooking').should('have.text', 'Book this room').click();
-    cy.get('.rbc-calendar').should('exist').and('be.visible');
+    /* User Story #2 */
+    // Opens the calendar in edit mode
+    openCalendar();
+    cy.get('.rbc-calendar')
+      .should('exist')
+      .and('be.visible')
+      .then(() => {
+        var date = new Date();
+        let bookingDate =
+          months[date.getMonth() + 1] + ' ' + date.getFullYear();
 
-    cy.get('.btn .confirmation-modal').within(() => {
-      cy.get('h3').should('have.text', 'Booking Successful!');
+        // Calendar defaults to the following month
+        cy.get('.rbc-toolbar-label')
+          .should('exist')
+          .and('be.visible')
+          .then((uiDate) => {
+            let uiBookingDate = uiDate.text();
 
-      cy.get('p:first').should(
-        'have.text',
-        'Congratulations! Your booking has been confirmed for:'
-      );
-    });
+            if (months[date.getMonth()] === 'December') {
+              bookingDate = 'January ' + [date.getFullYear() + 1];
+            }
+
+            /* ----------> BUG FOUND: Calendar defaults to current month <---------- */
+            if (uiBookingDate !== bookingDate) {
+              cy.log(
+                `BUG -- Incorrect default month: ${uiBookingDate}, ${bookingDate}`
+              );
+            }
+          });
+
+        // Contact information form opens in edit mode
+        cy.get('.hotel-room-info .col-sm-4')
+          .first()
+          .should('exist')
+          .and('be.visible')
+          .within(() => {
+            const fieldNames = ['Firstname', 'Lastname', 'Email', 'Phone'];
+
+            for (let i = 0; i < fieldNames.length; i++) {
+              cy.get(`:nth-child(${i + 1}) > .form-control`)
+                .should('exist')
+                .and('be.visible')
+                .and('have.attr', 'placeholder', fieldNames[i]);
+            }
+          });
+      });
   });
 });

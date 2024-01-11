@@ -1,7 +1,7 @@
 {
   "name": "nc-qa-engineer-project",
   "version": "1.0.0",
-  "description": "",
+  "description": "This project provides testing solutions for the New Classrooms take-home challenge",
   "main": "index.js",
   "scripts": {
     "cy:run:chrome": "cypress run --browser chrome",
