@@ -99,6 +99,18 @@ export function openCalendar() {
   cy.wait('@openCalendar');
 }
 
+export function getRandomMonth() {
+  let num = Math.floor(Math.random() * 8 + 3);
+  for (let i = 0; i < num; i++) {
+    cy.get('button')
+      .contains('Next')
+      .should('exist')
+      .and('be.visible')
+      .scrollIntoView()
+      .click();
+  }
+}
+
 export function selectDates() {
   cy.get('.rbc-date-cell:not(".rbc-off-range")')
     .eq(1)
@@ -117,36 +129,30 @@ export function completeInformationForm() {
 }
 
 export function bookTrip() {
-  cy.get('button')
-    .contains('Book')
+  cy.get('button').contains('Book').should('exist').and('be.visible').click();
+  cy.get('.confirmation-modal')
     .should('exist')
     .and('be.visible')
-    .click()
-    .then(() => {
-      cy.get('.confirmation-modal')
+    .within(() => {
+      // Check contents
+      cy.get('h3')
         .should('exist')
         .and('be.visible')
-        .within(() => {
-          // Check contents
-          cy.get('h3')
-            .should('exist')
-            .and('be.visible')
-            .and('have.text', 'Booking Successful!');
+        .and('have.text', 'Booking Successful!');
 
-          // Check dates
-          cy.get('p')
-            .should('exist')
-            .and('be.visible')
-            .and(
-              'contain.text',
-              'Congratulations! Your booking has been confirmed for:'
-            );
+      // Check dates
+      cy.get('p')
+        .should('exist')
+        .and('be.visible')
+        .and(
+          'contain.text',
+          'Congratulations! Your booking has been confirmed for:'
+        );
 
-          cy.get('.btn-outline-primary')
-            .should('exist')
-            .and('be.visible')
-            .and('have.text', 'Close')
-            .click();
-        });
+      cy.get('.btn-outline-primary')
+        .should('exist')
+        .and('be.visible')
+        .and('have.text', 'Close')
+        .click();
     });
 }
